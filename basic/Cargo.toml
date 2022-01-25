@@ -12,3 +12,7 @@ libc = "0.2"
 [[example]]
 name = "global_alloc"
 path = "examples/global_alloc.rs"
+
+[[example]]
+name = "async_await"
+path = "examples/async_await.rs"
