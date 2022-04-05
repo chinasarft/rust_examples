@@ -1,8 +1,6 @@
 use super::*;
 //pub(crate) const END_LINE: &str = "\r\n";
-use super::super::END_LINE;
-//pub const ATTRIBUTE_KEY: &str = "a=";
-use super::super::ATTRIBUTE_KEY;
+use super::super::lexer::END_LINE;
 
 use std::io::BufReader;
 use std::iter::Iterator;
@@ -19,9 +17,9 @@ fn test_extmap() -> Result<()> {
     let example_attr_extmap1_line = EXAMPLE_ATTR_EXTMAP1;
     let example_attr_extmap2_line = EXAMPLE_ATTR_EXTMAP2;
     let failing_attr_extmap1_line =
-        format!("{}{}{}", ATTRIBUTE_KEY, FAILING_ATTR_EXTMAP1, END_LINE);
+        format!("{}{}{}", "a=", FAILING_ATTR_EXTMAP1, END_LINE);
     let failing_attr_extmap2_line =
-        format!("{}{}{}", ATTRIBUTE_KEY, FAILING_ATTR_EXTMAP2, END_LINE);
+        format!("{}{}{}", "a=", FAILING_ATTR_EXTMAP2, END_LINE);
     let passingtests = vec![
         (EXAMPLE_ATTR_EXTMAP1, example_attr_extmap1_line),
         (EXAMPLE_ATTR_EXTMAP2, example_attr_extmap2_line),

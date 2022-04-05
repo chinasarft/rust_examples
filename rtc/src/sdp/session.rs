@@ -1,7 +1,8 @@
 use std::fmt;
-
+use url::Url;
 use crate::sdp::common::*;
 
+#[derive(Debug, Default)]
 pub struct Session {
     /// `v=0`
     ///
@@ -26,7 +27,7 @@ pub struct Session {
     /// `u=<uri>`
     ///
     /// <https://tools.ietf.org/html/rfc4566#section-5.5>
-    pub uri: Option<String>,
+    pub uri: Option<Url>,
 
     /// `e=<email-address>`
     ///
@@ -70,7 +71,7 @@ pub struct Session {
 
 /// TimeZone defines the structured object for "z=" line which describes
 /// repeated sessions scheduling.
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default)]
 pub struct TimeZone {
     pub adjustment_time: u64,
     pub offset: i64,
