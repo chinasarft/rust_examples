@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod sdp_test;
+
 use std::io::Cursor;
 use std::io;
 
@@ -114,12 +117,64 @@ impl SDP {
         }
 
         Ok(lexer.sdp)
+    }
 
+    pub fn marshal(sdp: &SDP) -> String {
+        let mut result = String::new();
 
-        // Err(Error::SyntaxError{
-        //     s:"".to_string(),
-        //     p:0,
-        // })
+        result += key_value_build("v=", Some(&sdp.session.version.to_string())).as_str();
+        result += key_value_build("o=", Some(&sdp.session.origin.to_string())).as_str();
+        result += key_value_build("s=", Some(&sdp.session.session_name)).as_str();
+
+        result += key_value_build("i=", sdp.session.session_information.as_ref()).as_str();
+
+        if let Some(uri) = &sdp.session.uri {
+            result += key_value_build("u=", Some(&format!("{}", uri))).as_str();
+        }
+        result += key_value_build("e=", sdp.session.email_address.as_ref()).as_str();
+        result += key_value_build("p=", sdp.session.phone_number.as_ref()).as_str();
+        if let Some(connection_information) = &sdp.session.connection_information {
+            result += key_value_build("c=", Some(&connection_information.to_string())).as_str();
+        }
+
+        for bandwidth in &sdp.session.bandwidth {
+            result += key_value_build("b=", Some(&bandwidth.to_string())).as_str();
+        }
+        for time_description in &sdp.time_descriptions {
+            result += key_value_build("t=", Some(&time_description.timing.to_string())).as_str();
+            for repeat_time in &time_description.repeat_times {
+                result += key_value_build("r=", Some(&repeat_time.to_string())).as_str();
+            }
+        }
+        if !sdp.session.time_zones.is_empty() {
+            let mut time_zones = vec![];
+            for time_zone in &sdp.session.time_zones {
+                time_zones.push(time_zone.to_string());
+            }
+            result += key_value_build("z=", Some(&time_zones.join(" "))).as_str();
+        }
+        result += key_value_build("k=", sdp.session.encryption_key.as_ref()).as_str();
+        for attribute in &sdp.session.attributes {
+            result += key_value_build("a=", Some(&attribute.to_string())).as_str();
+        }
+
+        for media_description in &sdp.media_descriptions {
+            result +=
+                key_value_build("m=", Some(&media_description.media_name.to_string())).as_str();
+            result += key_value_build("i=", media_description.media_title.as_ref()).as_str();
+            if let Some(connection_information) = &media_description.connection_information {
+                result += key_value_build("c=", Some(&connection_information.to_string())).as_str();
+            }
+            for bandwidth in &media_description.bandwidth {
+                result += key_value_build("b=", Some(&bandwidth.to_string())).as_str();
+            }
+            result += key_value_build("k=", media_description.encryption_key.as_ref()).as_str();
+            for attribute in &media_description.attributes {
+                result += key_value_build("a=", Some(&attribute.to_string())).as_str();
+            }
+        }
+
+        result
     }
 }
 
@@ -906,5 +961,15 @@ fn unmarshal_media_attribute<'a, R: io::BufRead + io::Seek>(
         Ok(Some(StateFn { f: mo_aa }))
     } else {
         Err(Error::SdpEmptyTimeDescription)
+    }
+}
+
+
+
+fn key_value_build(key: &str, value: Option<&String>) -> String {
+    if let Some(val) = value {
+        format!("{}{}{}", key, val, END_LINE)
+    } else {
+        "".to_string()
     }
 }
