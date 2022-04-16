@@ -8,6 +8,9 @@ use super::direction::*;
 use std::fmt;
 use std::io;
 use url::Url;
+use std::collections::HashMap;
+
+type ExtIdx = u32;
 
 /// Default ext values
 pub const DEF_EXT_MAP_VALUE_ABS_SEND_TIME: usize = 1;
@@ -15,12 +18,66 @@ pub const DEF_EXT_MAP_VALUE_TRANSPORT_CC: usize = 2;
 pub const DEF_EXT_MAP_VALUE_SDES_MID: usize = 3;
 pub const DEF_EXT_MAP_VALUE_SDES_RTP_STREAM_ID: usize = 4;
 
-pub const ABS_SEND_TIME_URI: &str = "http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time";
-pub const TRANSPORT_CC_URI: &str =
-    "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01";
-pub const SDES_MID_URI: &str = "urn:ietf:params:rtp-hdrext:sdes:mid";
-pub const SDES_RTP_STREAM_ID_URI: &str = "urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id";
-pub const AUDIO_LEVEL_URI: &str = "urn:ietf:params:rtp-hdrext:ssrc-audio-level";
+pub const ABS_SEND_TIME_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time";
+pub const TRANSPORT_CC_EXT: &str = "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01";
+pub const PLAYOUT_DELAY_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/playout-delay";
+pub const VIDEO_CONTENT_TYPE_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/video-content-type";
+pub const VIDEO_TIMING_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/video-timing";
+pub const COLOR_SPACE_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/color-space";
+pub const SDES_MID_EXT: &str = "urn:ietf:params:rtp-hdrext:sdes:mid";
+pub const SDES_RID_EXT: &str = "urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id";
+pub const SDES_RRID_EXT: &str = "urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id";
+pub const AUDIO_LEVEL_EXT: &str = "urn:ietf:params:rtp-hdrext:ssrc-audio-level";
+pub const VIDEO_ORIENTATION_EXT: &str = "urn:3gpp:video-orientation";
+pub const TOFFSET_EXT: &str = "urn:ietf:params:rtp-hdrext:toffset";
+
+pub const ExtIdxNone: ExtIdx = 0;
+pub const ABS_SEND_TIME_EXT_IDX: ExtIdx = 1;
+pub const TRANSPORT_CC_EXT_IDX: ExtIdx = 2;
+pub const PLAYOUT_DELAY_EXT_IDX: ExtIdx = 3;
+pub const VIDEO_CONTENT_TYPE_EXT_IDX: ExtIdx = 4;
+pub const VIDEO_TIMING_EXT_IDX: ExtIdx = 5;
+pub const COLOR_SPACE_EXT_IDX: ExtIdx = 6;
+pub const SDES_MID_EXT_IDX: ExtIdx = 7;
+pub const SDES_RID_EXT_IDX: ExtIdx = 8;
+pub const SDES_RRID_EXT_IDX: ExtIdx = 9; 
+pub const AUDIO_LEVEL_EXT_IDX: ExtIdx = 10;
+pub const VIDEO_ORIENTATION_EXT_IDX: ExtIdx = 11; 
+pub const TOFFSET_EXT_IDX: ExtIdx = 12;
+
+lazy_static! {
+    static ref ext_url_idx_map: HashMap<&'static str, ExtIdx> = {
+        let mut m = HashMap::new();
+        m.insert(ABS_SEND_TIME_EXT, ABS_SEND_TIME_EXT_IDX);
+        m.insert(TRANSPORT_CC_EXT, TRANSPORT_CC_EXT_IDX);
+        m.insert(PLAYOUT_DELAY_EXT, PLAYOUT_DELAY_EXT_IDX);
+        m.insert(VIDEO_CONTENT_TYPE_EXT, VIDEO_CONTENT_TYPE_EXT_IDX);
+        m.insert(VIDEO_TIMING_EXT, VIDEO_TIMING_EXT_IDX);
+        m.insert(COLOR_SPACE_EXT, COLOR_SPACE_EXT_IDX);
+        m.insert(SDES_MID_EXT, SDES_MID_EXT_IDX);
+        m.insert(SDES_RID_EXT, SDES_RID_EXT_IDX);
+        m.insert(SDES_RRID_EXT, SDES_RRID_EXT_IDX);
+        m.insert(AUDIO_LEVEL_EXT, AUDIO_LEVEL_EXT_IDX);
+        m.insert(VIDEO_ORIENTATION_EXT, VIDEO_ORIENTATION_EXT_IDX);
+        m.insert(TOFFSET_EXT, TOFFSET_EXT_IDX);
+        m
+    };
+}
+
+pub const ext_idx_url_map: [&'static str;12] = [
+    ABS_SEND_TIME_EXT,
+    TRANSPORT_CC_EXT,
+    PLAYOUT_DELAY_EXT,
+    VIDEO_CONTENT_TYPE_EXT,
+    VIDEO_TIMING_EXT,
+    COLOR_SPACE_EXT,
+    SDES_MID_EXT,
+    SDES_RID_EXT,
+    SDES_RRID_EXT,
+    AUDIO_LEVEL_EXT,
+    VIDEO_ORIENTATION_EXT,
+    TOFFSET_EXT,
+];
 
 /// ExtMap represents the activation of a single RTP header extension
 #[derive(Debug, Clone, Default)]
@@ -114,3 +171,12 @@ impl ExtMap {
         "extmap:".to_string() + self.to_string().as_str()
     }
 }
+
+pub fn get_ext_uri_idx(uri: &str) -> ExtIdx {
+    let optIdx =  ext_url_idx_map.get(uri);
+    if let Some(idx) = optIdx {
+        return *idx;
+    }
+    ExtIdxNone
+}
+

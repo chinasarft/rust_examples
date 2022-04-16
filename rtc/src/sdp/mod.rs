@@ -176,6 +176,13 @@ impl SDP {
 
         result
     }
+
+    pub fn serialize(&self) -> Vec<u8> {
+        let mut srl = Vec::<u8>::with_capacity(1024);
+        
+
+        srl
+    }
 }
 
 fn s_v<'a, R: io::BufRead + io::Seek>(lexer: &mut Lexer<'a, R>) -> Result<Option<StateFn<'a, R>>> {
