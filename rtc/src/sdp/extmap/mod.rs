@@ -18,6 +18,7 @@ pub const DEF_EXT_MAP_VALUE_TRANSPORT_CC: usize = 2;
 pub const DEF_EXT_MAP_VALUE_SDES_MID: usize = 3;
 pub const DEF_EXT_MAP_VALUE_SDES_RTP_STREAM_ID: usize = 4;
 
+pub const NONE_EXT: &str = "";
 pub const ABS_SEND_TIME_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time";
 pub const TRANSPORT_CC_EXT: &str = "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01";
 pub const PLAYOUT_DELAY_EXT: &str = "http://www.webrtc.org/experiments/rtp-hdrext/playout-delay";
@@ -64,7 +65,8 @@ lazy_static! {
     };
 }
 
-pub const ext_idx_url_map: [&'static str;12] = [
+pub const ext_idx_url_map: [&'static str;13] = [
+    NONE_EXT,
     ABS_SEND_TIME_EXT,
     TRANSPORT_CC_EXT,
     PLAYOUT_DELAY_EXT,
@@ -84,7 +86,7 @@ pub const ext_idx_url_map: [&'static str;12] = [
 pub struct ExtMap {
     pub value: isize,
     pub direction: Direction,
-    pub uri: Option<Url>,
+    pub uri_idx: ExtIdx,
     pub ext_attr: Option<String>,
 }
 
@@ -95,9 +97,8 @@ impl fmt::Display for ExtMap {
             output += format!("/{}", self.direction).as_str();
         }
 
-        if let Some(uri) = &self.uri {
-            output += format!(" {}", uri).as_str();
-        }
+        let uri_str = get_ext_uri_by_idx(self.uri_idx);
+        output += format!(" {}", uri_str).as_str();
 
         if let Some(ext_attr) = &self.ext_attr {
             output += format!(" {}", ext_attr).as_str();
@@ -150,7 +151,7 @@ impl ExtMap {
             }
         }
 
-        let uri = Some(Url::parse(fields[1])?);
+        let uri_idx = get_idx_by_ext_uri(fields[1]);
 
         let ext_attr = if fields.len() == 3 {
             Some(fields[2].to_owned())
@@ -161,7 +162,7 @@ impl ExtMap {
         Ok(ExtMap {
             value,
             direction,
-            uri,
+            uri_idx,
             ext_attr,
         })
     }
@@ -172,11 +173,19 @@ impl ExtMap {
     }
 }
 
-pub fn get_ext_uri_idx(uri: &str) -> ExtIdx {
-    let optIdx =  ext_url_idx_map.get(uri);
-    if let Some(idx) = optIdx {
+pub fn get_idx_by_ext_uri(uri: &str) -> ExtIdx {
+    let opt_idx =  ext_url_idx_map.get(uri);
+    if let Some(idx) = opt_idx {
         return *idx;
     }
     ExtIdxNone
+}
+
+pub fn get_ext_uri_by_idx(idx: ExtIdx) -> &'static str {
+    let uri = ext_idx_url_map.get(idx as usize);
+    if let Some(uriStr) = uri {
+        return uriStr;
+    }
+    NONE_EXT
 }
 

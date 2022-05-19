@@ -7,18 +7,7 @@ use crate::sdp::extmap::*;
 use crate::sdp::common::*;
 
 /// Constants for extmap key
-pub const EXT_MAP_VALUE_TRANSPORT_CC_KEY: isize = 3;
-pub const EXT_MAP_VALUE_TRANSPORT_CC_URI: &str =
-    "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01";
-
-fn ext_map_uri() -> HashMap<isize, &'static str> {
-    let mut m = HashMap::new();
-    m.insert(
-        EXT_MAP_VALUE_TRANSPORT_CC_KEY,
-        EXT_MAP_VALUE_TRANSPORT_CC_URI,
-    );
-    m
-}
+pub const TRANSPORT_CC_EXT_VALUE: isize = 3; //EXT_MAP_VALUE_TRANSPORT_CC_KEY
 
 /// MediaDescription represents a media type.
 /// <https://tools.ietf.org/html/rfc4566#section-5.14>
@@ -178,21 +167,10 @@ impl MediaDescription {
 
     /// with_transport_cc_extmap adds an extmap to the media description
     pub fn with_transport_cc_extmap(self) -> Self {
-        let uri = {
-            let m = ext_map_uri();
-            if let Some(uri_str) = m.get(&EXT_MAP_VALUE_TRANSPORT_CC_KEY) {
-                match Url::parse(uri_str) {
-                    Ok(uri) => Some(uri),
-                    Err(_) => None,
-                }
-            } else {
-                None
-            }
-        };
 
         let e = ExtMap {
-            value: EXT_MAP_VALUE_TRANSPORT_CC_KEY,
-            uri,
+            value: TRANSPORT_CC_EXT_VALUE,
+            uri_idx: TRANSPORT_CC_EXT_IDX,
             ..Default::default()
         };
 

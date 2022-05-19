@@ -5,12 +5,12 @@ use super::super::lexer::END_LINE;
 use std::io::BufReader;
 use std::iter::Iterator;
 
-const EXAMPLE_ATTR_EXTMAP1: &str = "extmap:1 http://example.com/082005/ext.htm#ttime";
+const EXAMPLE_ATTR_EXTMAP1: &str = "extmap:1 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time";
 const EXAMPLE_ATTR_EXTMAP2: &str =
-    "extmap:2/sendrecv http://example.com/082005/ext.htm#xmeta short";
+    "extmap:2/sendrecv http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01 short";
 const FAILING_ATTR_EXTMAP1: &str =
-    "extmap:257/sendrecv http://example.com/082005/ext.htm#xmeta short";
-const FAILING_ATTR_EXTMAP2: &str = "extmap:2/blorg http://example.com/082005/ext.htm#xmeta short";
+    "extmap:257/sendrecv http://nosuchext.com/ext.htm#xmeta short";
+const FAILING_ATTR_EXTMAP2: &str = "extmap:2/blorg http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01 short";
 
 #[test]
 fn test_extmap() -> Result<()> {
@@ -55,12 +55,10 @@ fn test_extmap() -> Result<()> {
 fn test_transport_cc_extmap() -> Result<()> {
     // a=extmap:<value>["/"<direction>] <URI> <extensionattributes>
     // a=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01
-    let uri = Some(Url::parse(
-        "http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01",
-    )?);
+    let uri_idx = TRANSPORT_CC_EXT_IDX;
     let e = ExtMap {
         value: 3,
-        uri,
+        uri_idx,
         direction: Direction::Unspecified,
         ext_attr: None,
     };
